@@ -1,16 +1,26 @@
 # Mini Issue Triage
 
-A small command-line tool that ranks bug reports and groups likely duplicates. It is built as a practical second-year software-development project using dictionaries, heaps, sets, sorting, and text processing.
+This is a small command-line tool that ranks bug reports and groups issues that might be duplicates.
 
-## Why This Project Exists
+I made it because real software teams often have many bugs and not enough time to look at all of them first. A tool like this can help decide what should be checked first.
 
-Small teams often have many bug reports but limited time. This tool helps answer:
+## What It Does
 
-- Which issues should we look at first?
-- Which bugs might be duplicates?
-- Why did an issue receive its priority score?
+The tool reads a JSON file with issues, then gives each issue a score.
+
+The score is based on things like:
+
+- labels such as `critical`, `high`, `bug`, or `security`
+- keywords such as `crash`, `login`, or `data loss`
+- how old the issue is
+- how many comments it has
+- whether it looks similar to another issue
+
+Then it prints the issues from highest priority to lowest priority.
 
 ## Quick Start
+
+Rank the sample issues:
 
 ```bash
 PYTHONPATH=src python -m issue_triage rank examples/issues.json
@@ -28,7 +38,7 @@ Run tests:
 PYTHONPATH=src python -m unittest discover -s tests
 ```
 
-## Input Format
+## Input Example
 
 ```json
 [
@@ -43,15 +53,27 @@ PYTHONPATH=src python -m unittest discover -s tests
 ]
 ```
 
-## What The Score Considers
+## Output Example
 
-- severity labels like `critical`, `high`, `medium`, and `low`
-- keywords like `crash`, `security`, `data loss`, and `login`
-- issue age
-- number of comments
-- whether the issue has bug-related labels
+```text
+4 issue(s) ranked
 
-## What This Shows
+1. #104 score=249
+   Security issue in export endpoint
+   reasons: label:security +70, label:critical +80, label:bug +20
+```
 
-This repo demonstrates practical software-development thinking: prioritization, text processing, basic ranking algorithms, JSON input/output, CLI design, and tests.
+The reasons are included so the score is not a mystery.
+
+## What I Practiced
+
+- dictionaries and sets
+- heaps for ranking
+- sorting
+- simple text matching
+- JSON input and output
+- command-line tool design
+- tests for scoring and duplicate grouping
+
+This project is small, but it connects data structures to a real developer workflow.
 
