@@ -1,0 +1,35 @@
+[
+  {
+    "id": 101,
+    "title": "Login crashes after password reset",
+    "body": "Users report that the app crashes after resetting their password.",
+    "labels": ["bug", "crash", "high"],
+    "created_at": "2026-04-25",
+    "comments": 6
+  },
+  {
+    "id": 102,
+    "title": "Password reset causes login crash",
+    "body": "After reset, login screen crashes for several users.",
+    "labels": ["bug", "login"],
+    "created_at": "2026-04-26",
+    "comments": 3
+  },
+  {
+    "id": 103,
+    "title": "Settings page loads slowly",
+    "body": "Opening settings takes about five seconds.",
+    "labels": ["performance", "low"],
+    "created_at": "2026-04-20",
+    "comments": 1
+  },
+  {
+    "id": 104,
+    "title": "Security issue in export endpoint",
+    "body": "A user can download another user's CSV export.",
+    "labels": ["security", "critical", "bug"],
+    "created_at": "2026-04-27",
+    "comments": 8
+  }
+]
+
