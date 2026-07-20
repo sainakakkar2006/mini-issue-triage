@@ -1,14 +1,16 @@
 # Mini Issue Triage
 
-This is a small command-line tool that ranks bug reports and groups issues that might be duplicates.
+**Name:** Saina Kakkar
 
-I made it because real software teams often have many bugs and not enough time to look at all of them first. A tool like this can help decide what should be checked first.
+## Design and Implementation
 
-## What It Does
+This is a small command-line tool that ranks bug reports and groups issues
+that might be duplicates. I made it because real software teams often have
+many bugs and not enough time to look at all of them first. A tool like this
+can help decide what should be checked first.
 
-The tool reads a JSON file with issues, then gives each issue a score.
-
-The score is based on things like:
+The tool reads a JSON file with issues, then gives each issue a score based
+on:
 
 - labels such as `critical`, `high`, `bug`, or `security`
 - keywords such as `crash`, `login`, or `data loss`
@@ -16,9 +18,10 @@ The score is based on things like:
 - how many comments it has
 - whether it looks similar to another issue
 
-Then it prints the issues from highest priority to lowest priority.
+Then it prints the issues from highest priority to lowest priority. I used a
+heap for the ranking and simple text matching for the duplicate grouping.
 
-## Quick Start
+## Run
 
 Rank the sample issues:
 
@@ -30,12 +33,6 @@ Write a JSON report:
 
 ```bash
 PYTHONPATH=src python -m issue_triage rank examples/issues.json --format json --out reports/triage.json
-```
-
-Run tests:
-
-```bash
-PYTHONPATH=src python -m unittest discover -s tests
 ```
 
 ## Input Example
@@ -63,17 +60,23 @@ PYTHONPATH=src python -m unittest discover -s tests
    reasons: label:security +70, label:critical +80, label:bug +20
 ```
 
-The reasons are included so the score is not a mystery.
+Notice the `reasons` line. I included it so the score is not a mystery. In
+the example above you can read exactly why #104 came first: the security
+label alone is worth 70 points, which is a choice I made on purpose, because
+a security bug that waits in the backlog is a bigger risk than a UI bug.
 
-## What I Practiced
+## Verify
 
-- dictionaries and sets
-- heaps for ranking
-- sorting
-- simple text matching
-- JSON input and output
-- command-line tool design
-- tests for scoring and duplicate grouping
+```bash
+PYTHONPATH=src python -m unittest discover -s tests
+```
 
-This project is small, but it connects data structures to a real developer workflow.
+The tests cover the scoring and the duplicate grouping.
 
+## Notes
+
+Could've had the tool print just a sorted list, but a score without an
+explanation is hard to trust, so every ranking shows exactly which labels
+and keywords contributed and by how much. This project is small, but it
+connects data structures (dictionaries, sets, heaps, sorting) to a real
+developer workflow.
