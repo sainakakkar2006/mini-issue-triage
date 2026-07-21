@@ -1,4 +1,4 @@
-# Mini Issue Triage
+# mini-issue-triage
 
 **Name:** Saina Kakkar
 
@@ -9,17 +9,46 @@ that might be duplicates. I made it because real software teams often have
 many bugs and not enough time to look at all of them first. A tool like this
 can help decide what should be checked first.
 
-The tool reads a JSON file with issues, then gives each issue a score based
-on:
+The tool reads a JSON file with issues, then gives each issue a score, then
+prints the issues from highest priority to lowest priority. I used a heap
+for the ranking and simple text matching for the duplicate grouping.
 
-- labels such as `critical`, `high`, `bug`, or `security`
-- keywords such as `crash`, `login`, or `data loss`
-- how old the issue is
-- how many comments it has
-- whether it looks similar to another issue
+```
+issues.json ──► score each issue ──► heap ──► ranked list with reasons
+                (labels, keywords,           (duplicates grouped)
+                 age, comments)
+```
 
-Then it prints the issues from highest priority to lowest priority. I used a
-heap for the ranking and simple text matching for the duplicate grouping.
+## The Scoring Table
+
+The exact weights live in `scoring.py`. Labels:
+
+| Label | Points |
+|---|---|
+| `critical` | 80 |
+| `security` | 70 |
+| `high` | 55 |
+| `regression` | 35 |
+| `medium` | 30 |
+| `bug` | 20 |
+| `low` | 10 |
+
+Keywords found in the title or body:
+
+| Keyword | Points |
+|---|---|
+| `data loss` | 70 |
+| `security` | 60 |
+| `crash` | 45 |
+| `payment` | 40 |
+| `login` | 25 |
+| `timeout` | 20 |
+| `slow` | 15 |
+
+On top of that, older issues and issues with more comments earn extra
+points. The weights are my judgment calls, not science. `security` scoring
+above `high` was on purpose: a security bug that waits in a backlog is a
+bigger risk than a UI bug, even a loud one.
 
 ## Run
 
@@ -34,6 +63,20 @@ Write a JSON report:
 ```bash
 PYTHONPATH=src python -m issue_triage rank examples/issues.json --format json --out reports/triage.json
 ```
+
+## CLI Reference
+
+| Argument | Default | What it does |
+|---|---|---|
+| `issues` | (required) | Path to the issues JSON file |
+| `--format` | `text` | `text` or `json` |
+| `--today` | real today | Override today's date (`YYYY-MM-DD`) |
+| `--out` | none | Write the report to a file |
+
+The `--today` flag looks strange until you think about the age scoring. An
+issue's age depends on what day it is, so without this flag the same input
+could produce different scores tomorrow. Tests pin `--today` so the output
+is fully deterministic.
 
 ## Input Example
 
@@ -60,10 +103,24 @@ PYTHONPATH=src python -m issue_triage rank examples/issues.json --format json --
    reasons: label:security +70, label:critical +80, label:bug +20
 ```
 
-Notice the `reasons` line. I included it so the score is not a mystery. In
-the example above you can read exactly why #104 came first: the security
-label alone is worth 70 points, which is a choice I made on purpose, because
-a security bug that waits in the backlog is a bigger risk than a UI bug.
+The `reasons` line is there so the score is not a mystery. You
+can check the math against the tables above: 70 + 80 + 20 accounts for 170
+of the 249 points, and the rest comes from keywords, age, and comments.
+
+## Project Layout
+
+```
+src/issue_triage/
+  cli.py         the rank subcommand
+  models.py      the Issue dataclass
+  io.py          reading the issues JSON
+  scoring.py     LABEL_SCORES, KEYWORD_SCORES, age and comment bonuses
+  duplicates.py  similarity grouping for possible duplicates
+  triage.py      puts scoring + duplicates together, heap ranking
+  text.py        text normalization helpers
+  reporting.py   text / json formatters
+tests/           scoring, duplicates, triage, and CLI tests
+```
 
 ## Verify
 
@@ -80,3 +137,7 @@ explanation is hard to trust, so every ranking shows exactly which labels
 and keywords contributed and by how much. This project is small, but it
 connects data structures (dictionaries, sets, heaps, sorting) to a real
 developer workflow.
+
+## License
+
+MIT. See the [LICENSE](LICENSE) file.
